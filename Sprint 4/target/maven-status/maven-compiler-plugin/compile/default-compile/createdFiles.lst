@@ -1,0 +1,6 @@
+com\example\orderservice\OrdersServiceApplication.class
+com\example\orderservice\model\OrderStatus.class
+com\example\orderservice\repository\OrderRepository.class
+com\example\orderservice\controller\OrderController.class
+com\example\orderservice\service\OrderService.class
+com\example\orderservice\model\Order.class
