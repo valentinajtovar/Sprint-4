@@ -1,0 +1,32 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE_REPO_NAME: "orders-service"
+    AWS_REGION: "us-east-1"
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - REPO_URI=$(aws ecr describe-repositories --repository-names $IMAGE_REPO_NAME --query "repositories[0].repositoryUri" --output text)
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REPO_URI
+
+  build:
+    commands:
+      - echo Building application...
+      - mvn clean package -DskipTests
+      - echo Building Docker image...
+      - docker build -t $IMAGE_REPO_NAME .
+      - docker tag $IMAGE_REPO_NAME:latest $REPO_URI:latest
+
+  post_build:
+    commands:
+      - echo Pushing image to ECR...
+      - docker push $REPO_URI:latest
+      - echo Writing image definitions file...
+      - printf '[{"name":"orders-service","imageUri":"%s"}]' "$REPO_URI:latest" > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
